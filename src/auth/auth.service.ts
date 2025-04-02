@@ -116,7 +116,6 @@ export class AuthService {
       expiresIn: '15m',
       secret: this.config.get('JWT_SECRET'),
     });
-    console.log('Access Token:', access_token);
     return access_token;
   }
 

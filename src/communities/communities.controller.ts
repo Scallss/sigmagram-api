@@ -20,6 +20,11 @@ export class CommunitiesController {
     return this.communitiesService.findAll();
   }
 
+  @Get('followed')
+  getFollowedCommunities(@GetUser('id') userId: string) {
+    return this.communitiesService.getFollowedCommunities(userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @GetUser('id') userId: string) {
   return this.communitiesService.findOne(id, userId);

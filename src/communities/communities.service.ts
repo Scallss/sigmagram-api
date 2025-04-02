@@ -16,6 +16,35 @@ export class CommunitiesService {
     });
   }
 
+  async getFollowedCommunities(userId: string) {
+    const follows = await this.databaseService.communityFollower.findMany({
+      where: { userId },
+      select: { communityId: true },
+    });
+  
+    if (follows.length === 0) {
+      return [];
+    }
+  
+    const communityIds = follows.map(follow => follow.communityId);
+  
+    const communities = await this.databaseService.community.findMany({
+      where: {
+        id: { in: communityIds },
+      },
+      include: {
+        creator: {
+          select: { username: true },
+        },
+      },
+    });
+  
+    return communities.map(community => ({
+      ...community,
+      isFollowed: true,
+    }));
+  }
+
   async findAll() {
     return this.databaseService.community.findMany({
       include: {

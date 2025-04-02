@@ -16,6 +16,7 @@ describe('CommunitiesController', () => {
       remove: jest.fn(),
       followCommunity: jest.fn(),
       unfollowCommunity: jest.fn(),
+      getFollowedCommunities: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -127,6 +128,21 @@ describe('CommunitiesController', () => {
       
       expect(await controller.unfollowCommunity(userId, communityId)).toBe(expectedResult);
       expect(communitiesServiceMock.unfollowCommunity).toHaveBeenCalledWith(userId, communityId);
+    });
+  });
+
+  describe('getFollowedCommunities', () => {
+    it('should call communitiesService.getFollowedCommunities with userId', async () => {
+      const userId = 'user-id';
+      const expectedResult = [
+        { id: 'community-1', isFollowed: true },
+        { id: 'community-2', isFollowed: true }
+      ];
+      
+      communitiesServiceMock.getFollowedCommunities.mockResolvedValue(expectedResult);
+      
+      expect(await controller.getFollowedCommunities(userId)).toBe(expectedResult);
+      expect(communitiesServiceMock.getFollowedCommunities).toHaveBeenCalledWith(userId);
     });
   });
 });

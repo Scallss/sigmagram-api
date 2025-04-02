@@ -21,6 +21,7 @@ describe('CommunitiesService', () => {
         findUnique: jest.fn(),
         create: jest.fn(),
         delete: jest.fn(),
+        findMany: jest.fn(),
       },
       $transaction: jest.fn((callback) => callback(databaseServiceMock)),
     };
@@ -157,7 +158,6 @@ describe('CommunitiesService', () => {
         id: communityId, 
         creatorId: differentUserId,
         category: 'Technology',
-        // Add missing properties to match the return type
         isFollowed: false,
         creator: { username: 'different-creator' },
         createdAt: new Date(),
@@ -238,6 +238,75 @@ describe('CommunitiesService', () => {
       
       await expect(service.unfollowCommunity(userId, communityId))
         .rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getFollowedCommunities', () => {
+    it('should return communities that user is following', async () => {
+      const userId = 'user-id';
+      const follows = [
+        { communityId: 'community-1' },
+        { communityId: 'community-2' }
+      ];
+      const communities = [
+        { 
+          id: 'community-1',
+          category: 'Technology',
+          creator: { username: 'creator1' },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          homePhoto: 'photo1.jpg',
+          description: 'Tech community',
+          followersCount: 5,
+          creatorId: 'creator-id-1'
+        },
+        { 
+          id: 'community-2',
+          category: 'Gaming',
+          creator: { username: 'creator2' },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          homePhoto: 'photo2.jpg',
+          description: 'Gaming community',
+          followersCount: 10,
+          creatorId: 'creator-id-2'
+        }
+      ];
+      
+      databaseServiceMock.communityFollower.findMany.mockResolvedValue(follows);
+      databaseServiceMock.community.findMany.mockResolvedValue(communities);
+      
+      const result = await service.getFollowedCommunities(userId);
+      
+      expect(databaseServiceMock.communityFollower.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        select: { communityId: true },
+      });
+      
+      expect(databaseServiceMock.community.findMany).toHaveBeenCalledWith({
+        where: { id: { in: ['community-1', 'community-2'] } },
+        include: {
+          creator: {
+            select: { username: true },
+          },
+        },
+      });
+      
+      expect(result).toEqual([
+        { ...communities[0], isFollowed: true },
+        { ...communities[1], isFollowed: true }
+      ]);
+    });
+  
+    it('should return empty array if user follows no communities', async () => {
+      const userId = 'user-id';
+      
+      databaseServiceMock.communityFollower.findMany.mockResolvedValue([]);
+      
+      const result = await service.getFollowedCommunities(userId);
+      
+      expect(result).toEqual([]);
+      expect(databaseServiceMock.community.findMany).not.toHaveBeenCalled();
     });
   });
 });
