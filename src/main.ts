@@ -9,7 +9,7 @@ async function bootstrap() {
 
   // Configure CORS for production
   const corsOrigin = process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL
+    ? 'https://sigmagram-fe.vercel.app'
     : 'http://localhost:5173';
 
   app.enableCors({
