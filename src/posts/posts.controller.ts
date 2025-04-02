@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Fo
 import { PostsService } from './posts.service';
 import { Prisma, User } from '@prisma/client';
 import { JwtGuard } from '../auth/guard';
-import { GetUser } from 'src/auth/decorator';
+import { GetUser } from '../auth/decorator';
 import { CreatePostDto, UpdatePostDto } from './dto';
 
 @UseGuards(JwtGuard)

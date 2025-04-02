@@ -19,7 +19,6 @@ export class PostsService {
   async findAll(userId: string, skip: number, take: number, communityId?: string) {
     // If communityId is provided, filter by that specific community
     if (communityId) {
-      // Filter posts by the specified community
       const posts = await this.databaseService.post.findMany({
         skip,
         take,
@@ -35,7 +34,7 @@ export class PostsService {
         },
       });
   
-      // Add like status to posts
+      // Add like status to return 
       return this.addLikeStatusToPosts(posts, userId);
     } else {
       // Get communities the user follows

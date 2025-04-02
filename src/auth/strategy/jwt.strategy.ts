@@ -1,4 +1,3 @@
-// filepath: src/auth/strategy/jwt.strategy.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -16,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const jwtSecret = config.get('JWT_SECRET');
     super({
       jwtFromRequest: (req: Request) => {
-        // Extract the access_token from cookies
         return req.cookies?.access_token || null;
       },
       secretOrKey: jwtSecret,

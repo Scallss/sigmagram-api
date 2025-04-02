@@ -10,7 +10,6 @@ export class CommentsService {
   async create(userId: string, createCommentDto: CreateCommentDto) {
     const { postId, content } = createCommentDto;
 
-    // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
       // Create the comment
       const comment = await prisma.comment.create({
@@ -21,7 +20,6 @@ export class CommentsService {
         },
       });
 
-      // Increment the post's commentsCount
       await prisma.post.update({
         where: { id: postId },
         data: {
@@ -86,12 +84,10 @@ export class CommentsService {
 
     // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
-      // Delete the comment
       const deletedComment = await prisma.comment.delete({
         where: { id },
       });
 
-      // Decrement the post's commentsCount
       await prisma.post.update({
         where: { id: comment.postId },
         data: {

@@ -13,11 +13,10 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
-  // filepath: src/auth/auth.controller.ts
   @HttpCode(HttpStatus.OK)
   @Post('signin')
   async signin(@Body() dto: AuthDto, @Res({ passthrough: true }) res) {
-    return this.authService.signin(dto, res); // Return only the refresh token in the response
+    return this.authService.signin(dto, res); 
   }
 
   @HttpCode(HttpStatus.OK)

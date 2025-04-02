@@ -19,7 +19,6 @@ export class LikesService {
 
     // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
-      // Create the like
       const like = await prisma.like.create({
         data: {
           userId,
@@ -27,7 +26,6 @@ export class LikesService {
         },
       });
 
-      // Increment the post's likesCount
       await prisma.post.update({
         where: { id: postId },
         data: {
@@ -55,14 +53,12 @@ export class LikesService {
 
     // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
-      // Delete the like
       const deletedLike = await prisma.like.delete({
         where: {
           unique_user_post_like: { userId, postId },
         },
       });
 
-      // Decrement the post's likesCount
       await prisma.post.update({
         where: { id: postId },
         data: {

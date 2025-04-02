@@ -47,11 +47,10 @@ export class AuthService {
     const tokens = await this.generateTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 
-    // Set the access_token in an HTTP-only cookie
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: 'strict', // Prevent CSRF attacks
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -65,7 +64,6 @@ export class AuthService {
       data: { refreshToken: null },
     });
 
-    // Return a success message instead of the `res` object
     return { message: 'Logged out successfully' };
   }
 
@@ -81,7 +79,6 @@ export class AuthService {
 
     const refresh = user.refreshToken;
 
-    // Decode the refresh token
     let decodedToken: { sub: string; exp: number };
     try {
       decodedToken = this.jwt.verify(refresh, {
@@ -93,7 +90,7 @@ export class AuthService {
   
   
     // Check if the refresh token is expired
-    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    const currentTime = Math.floor(Date.now() / 1000); 
     if (decodedToken.exp < currentTime) {
       throw new UnauthorizedException('Refresh token has expired');
     }
@@ -101,15 +98,13 @@ export class AuthService {
 
     const payload = { sub: userId, username: user.username };
 
-    // Generate new tokens
     const accessToken = await this.generateAccess(payload);
 
-    // Set the access_token in an HTTP-only cookie
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
   
     return accessToken;

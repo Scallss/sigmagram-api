@@ -40,7 +40,6 @@ export class CommunitiesService {
       throw new NotFoundException('Community not found');
     }
   
-    // If userId is provided, check if the user follows this community
     let isFollowed = false;
     if (userId) {
       const follow = await this.databaseService.communityFollower.findUnique({
@@ -51,7 +50,6 @@ export class CommunitiesService {
       isFollowed = !!follow;
     }
   
-    // Return the community with the follow status
     return {
       ...community,
       isFollowed,
@@ -87,7 +85,6 @@ export class CommunitiesService {
   }
 
   async followCommunity(userId: string, communityId: string) {
-    // Check if the community exists
     const community = await this.databaseService.community.findUnique({
       where: { id: communityId },
     });
@@ -109,7 +106,6 @@ export class CommunitiesService {
 
     // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
-      // Add the user to the community's followers
       const follow = await prisma.communityFollower.create({
         data: {
           userId,
@@ -117,7 +113,6 @@ export class CommunitiesService {
         },
       });
 
-      // Increment the community's followersCount
       await prisma.community.update({
         where: { id: communityId },
         data: {
@@ -145,14 +140,12 @@ export class CommunitiesService {
 
     // Use a transaction to ensure both operations succeed or fail together
     return this.databaseService.$transaction(async (prisma) => {
-      // Remove the user from the community's followers
       const unfollow = await prisma.communityFollower.delete({
         where: {
           unique_user_community_follow: { userId, communityId },
         },
       });
 
-      // Decrement the community's followersCount
       await prisma.community.update({
         where: { id: communityId },
         data: {
