@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https:// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String       @id @default(uuid())
+  username       String       @unique
+  password       String       // Hashed password
+  profilePicture String?      // Optional profile picture URL
+  bio            String?      // Bio, maximum 2 paragraphs
+  createdAt      DateTime     @default(now()) @map("time_created")
+  updatedAt      DateTime     @updatedAt
+  refreshToken   String?
+
+  // Relations
+  posts             Post[]
+  communities       Community[]
+  comments          Comment[]
+  likes             Like[]
+  followedCommunities CommunityFollower[]
+
+  @@map("users")
+}
+
+model Community {
+  id            String       @id @default(uuid())
+  category      String       @unique
+  homePhoto     String?      // URL to the community home photo
+  description   String?      // Community description
+  createdAt     DateTime     @default(now()) @map("time_created")
+  updatedAt     DateTime     @updatedAt
+  followersCount Int         @default(0) // New field for follower count
+
+  creatorId     String       @map("creator_id") // New field for the creator of the community
+  creator       User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  // Relations
+  posts         Post[]
+  followers     CommunityFollower[]
+
+  @@map("communities")
+}
+
+model Post {
+  id           String       @id @default(uuid())
+  content      String       // Text content of the post
+  photo        String?      // Optional photo URL
+  createdAt    DateTime     @default(now()) @map("time_created")
+  updatedAt    DateTime     @updatedAt
+  likesCount   Int          @default(0)  // New field for like count
+  commentsCount Int         @default(0)  // New field for comment count
+
+  // Relations
+  authorId     String       @map("user_id")
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  communityId  String       @map("community_id")
+  community    Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  
+  comments     Comment[]
+  likes        Like[]
+
+  @@index([authorId], name: "post_author_idx")
+  @@index([communityId], name: "post_community_idx")
+  @@map("posts")
+}
+
+model Comment {
+  id          String       @id @default(uuid())
+  content     String
+  createdAt   DateTime     @default(now()) @map("time_created")
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  authorId    String       @map("user_id")
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  postId      String       @map("post_id")
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([authorId], name: "comment_author_idx")
+  @@index([postId], name: "comment_post_idx")
+  @@map("comments")
+}
+
+model Like {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now()) @map("time_created")
+
+  // Relations
+  userId    String       @map("user_id")
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  postId    String       @map("post_id")
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId], name: "unique_user_post_like")
+  @@index([userId], name: "like_user_idx")
+  @@index([postId], name: "like_post_idx")
+  @@map("likes")
+}
+
+model CommunityFollower {
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now()) @map("time_created")
+
+  // Relations
+  userId      String       @map("user_id")
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  communityId String       @map("community_id")
+  community   Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId], name: "unique_user_community_follow")
+  @@index([userId], name: "follower_user_idx")
+  @@index([communityId], name: "follower_community_idx")
+  @@map("community_followers")
+}
